@@ -64,6 +64,7 @@ strands --kb YOUR_KB_ID "Load my previous calculator tool and enhance it with sc
 - 🎮 Customizable system prompt for specialized agents
 - 🪄 Nested agent capabilities with tool delegation
 - 🔧 Dynamic tool loading for extending functionality
+- 📦 Extra tool loading via `.tools` file or environment variable
 - 🖥️ Environment variable management and customization
 
 ## Integrated Tools
@@ -121,6 +122,43 @@ agent.tool.strand(
     system_prompt="You're an expert in creating web automation tools. Your specialty is developing reliable browser testing utilities."
 )
 ```
+
+## Extra Tools Loading
+
+Strands Agent Builder supports loading additional tools on startup through two methods:
+
+### 1. `.tools` File
+
+Create a `.tools` file in your project directory with one tool per line using fully qualified Python names:
+
+```bash
+# .tools file example
+# Lines starting with # are comments
+strands_tools.tools.mcp_client
+mypackage.custom_tools.data_processor
+external_package.special_tool
+```
+
+### 2. Environment Variable
+
+Set the `STRANDS_EXTRA_TOOLS` environment variable with comma-separated tool names:
+
+```bash
+export STRANDS_EXTRA_TOOLS="strands_tools.tools.mcp_client,mypackage.tools.custom_analyzer"
+strands
+```
+
+### Combined Usage
+
+Both methods can be used together - tools from the `.tools` file and environment variable will be loaded:
+
+```bash
+# .tools file contains: strands_tools.memory
+export STRANDS_EXTRA_TOOLS="strands_tools.current_time,mypackage.calculator"
+strands  # All three tools will be loaded
+```
+
+The extra tools are loaded after the default tools and any import errors are handled gracefully with warning messages.
 
 ## Model Configuration
 

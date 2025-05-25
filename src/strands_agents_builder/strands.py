@@ -5,6 +5,7 @@ Strands - A minimal CLI interface for Strands
 
 import argparse
 import os
+import importlib
 
 # Strands
 from strands import Agent
@@ -49,6 +50,41 @@ from tools import (
 )
 
 os.environ["STRANDS_TOOL_CONSOLE_MODE"] = "enabled"
+
+
+def load_extra_tools():
+    """Load extra tools from .tools file or STRANDS_EXTRA_TOOLS environment variable."""
+    extra_tools = []
+    
+    # Check .tools file
+    tools_file = ".tools"
+    if os.path.exists(tools_file):
+        try:
+            with open(tools_file, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        extra_tools.append(line)
+        except Exception as e:
+            print(f"Warning: Could not read .tools file: {e}")
+    
+    # Check environment variable
+    env_tools = os.getenv("STRANDS_EXTRA_TOOLS")
+    if env_tools:
+        extra_tools.extend([tool.strip() for tool in env_tools.split(",") if tool.strip()])
+    
+    # Import and return the tools
+    loaded_tools = []
+    for tool_name in extra_tools:
+        try:
+            module_path, attr_name = tool_name.rsplit(".", 1)
+            module = importlib.import_module(module_path)
+            tool = getattr(module, attr_name)
+            loaded_tools.append(tool)
+        except Exception as e:
+            print(f"Warning: Could not load extra tool '{tool_name}': {e}")
+    
+    return loaded_tools
 
 
 def main():
@@ -111,6 +147,10 @@ def main():
         welcome,
         rich_interface,
     ]
+
+    # Load extra tools
+    extra_tools = load_extra_tools()
+    tools.extend(extra_tools)
 
     agent = Agent(
         model=model,
