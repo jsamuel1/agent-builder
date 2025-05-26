@@ -24,6 +24,8 @@ DEFAULT_MODEL_CONFIG = {
             "budget_tokens": int(os.getenv("STRANDS_BUDGET_TOKENS", "2048")),
         }
     },
+    "cache_prompt": "default",
+    "cache_tools": "default",
 }
 
 
